@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.UserRegisterDto;
 import com.example.demo.exception.UserAlreadyExistsException;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
@@ -18,14 +19,14 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public User registerUser(User newUser) {
-        if (userRepository.existsByUsername(newUser.getUsername())) {
+    public User registerUser(UserRegisterDto userRegisterDto) {
+        if (userRepository.existsByUsername(userRegisterDto.getUsername())) {
             throw new UserAlreadyExistsException("Username already exists");
         }
         User user = new User().builder()
-                .username(newUser.getUsername())
-                .password(passwordEncoder.encode(newUser.getPassword()))
-                .email(newUser.getEmail())
+                .username(userRegisterDto.getUsername())
+                .password(passwordEncoder.encode(userRegisterDto.getPassword()))
+                .email(userRegisterDto.getEmail())
                 .build();
         return userRepository.save(user);
     }

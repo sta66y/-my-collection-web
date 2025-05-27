@@ -2,6 +2,8 @@ package com.example.demo.controller;
 
 import com.example.demo.config.JwtUtil;
 import com.example.demo.dto.AuthResponse;
+import com.example.demo.dto.UserLoginDto;
+import com.example.demo.dto.UserRegisterDto;
 import com.example.demo.exception.UserAlreadyExistsException;
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
@@ -17,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,33 +32,27 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
-        logger.info("Login attempt for username: {}", authRequest.getUsername());
+    public ResponseEntity<AuthResponse> login(@RequestBody UserLoginDto userLoginDto) {
+        logger.info("Login attempt for username: {}", userLoginDto.getUsername());
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
+                new UsernamePasswordAuthenticationToken(userLoginDto.getUsername(), userLoginDto.getPassword())
         );
-        String token = jwtUtil.generateToken(authRequest.getUsername());
-        logger.info("Login successful for username: {}", authRequest.getUsername());
-        return ResponseEntity.ok(new AuthResponse(token, authRequest.getUsername()));
+        String token = jwtUtil.generateToken(userLoginDto.getUsername());
+        logger.info("Login successful for username: {}", userLoginDto.getUsername());
+        return ResponseEntity.ok(new AuthResponse(token, userLoginDto.getUsername()));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody User user) {
-        logger.info("Registration attempt for username: {}", user.getUsername());
+    public ResponseEntity<AuthResponse> register(@RequestBody UserRegisterDto userRegisterDto) {
+        logger.info("Registration attempt for username: {}", userRegisterDto.getUsername());
         try {
-            userService.registerUser(user);
-            logger.info("Registration successful for username: {}", user.getUsername());
-            return ResponseEntity.ok(new AuthResponse(null, user.getUsername(), null));
+            userService.registerUser(userRegisterDto);
+            logger.info("Registration successful for username: {}", userRegisterDto.getUsername());
+            return ResponseEntity.ok(new AuthResponse(null, userRegisterDto.getUsername(), null));
         } catch (UserAlreadyExistsException e) {
-            logger.warn("Registration failed for username: {}. Reason: {}", user.getUsername(), e.getMessage());
+            logger.warn("Registration failed for username: {}. Reason: {}", userRegisterDto.getUsername(), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new AuthResponse(null, null, e.getMessage()));
         }
     }
-}
-
-@Data
-class AuthRequest {
-    private String username;
-    private String password;
 }
