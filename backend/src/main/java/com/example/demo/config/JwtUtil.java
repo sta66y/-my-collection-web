@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import com.example.demo.exception.InvalidJwtTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -56,7 +57,14 @@ public class JwtUtil {
 
     public boolean validateToken(String token, String username) {
         final String extractedUsername = extractUsername(token);
-        return extractedUsername.equals(username) && !isTokenExpired(token);
+        boolean isTokenExpired = isTokenExpired(token);
+        if (!extractedUsername.equals(username)) {
+            throw new InvalidJwtTokenException("Token username mismatch");
+        }
+        if (isTokenExpired) {
+            throw new InvalidJwtTokenException("JWT token has expired");
+        }
+        return true;
     }
 
     private boolean isTokenExpired(String token) {
