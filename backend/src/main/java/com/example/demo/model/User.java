@@ -25,7 +25,6 @@ public class User {
     @Column(nullable = false)
     private String username;
 
-    @OneToMany
-    @JoinColumn(name = "item_id")
-    private List<Item> itemId;
+    @OneToMany(mappedBy = "userId")
+    private List<Item> items;
 }
