@@ -22,4 +22,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new AuthResponse(null, null, "Invalid username or password"));
     }
+
+    @ExceptionHandler(InvalidJwtTokenException.class)
+    public ResponseEntity<String> handleInvalidJwtTokenException(InvalidJwtTokenException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ex.getMessage());
+    }
 }
